@@ -1,5 +1,6 @@
 package com.luizalebs.comunicacao_api.infraestructure.exceptions;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -30,4 +31,10 @@ public class GlobalExceptionHandler {
                 "JSON inválido. Use o formato de data: yyyy-MM-dd HH:mm:ss",
                 HttpStatus.BAD_REQUEST);
     }
+
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<String> handlerConflictException(ConflictException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
 }

@@ -6,6 +6,7 @@ import com.luizalebs.comunicacao_api.business.converter.ComunicacaoConverter;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.BusinessException;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.ConflictException;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.ResourceNotFoundException;
 import com.luizalebs.comunicacao_api.infraestructure.repositories.ComunicacaoRepository;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class ComunicacaoService {
     public ComunicacaoOutDTO agendarComunicacao(ComunicacaoInDTO dto) {
         if (Objects.isNull(dto)) {
             throw new BusinessException("Dados da mensagem inválidos.");
+        }
+        if (repository.existsByEmailDestinatario(dto.getEmailDestinatario())) {
+            throw new ConflictException("Já existe uma mensagem com este e-mail.");
         }
         dto.setStatusEnvio(StatusEnvioEnum.PENDENTE);
         ComunicacaoEntity entity = converter.paraEntity(dto);
