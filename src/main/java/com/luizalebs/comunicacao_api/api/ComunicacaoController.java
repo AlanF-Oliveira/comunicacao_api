@@ -26,6 +26,7 @@ public class ComunicacaoController {
     @Operation(summary = "Agendar mensagem",
             description = "Cria uma nova mensagem. O campo data deve estar no formato: yyyy-MM-dd HH:mm:ss")
     @ApiResponse(responseCode = "201", description = "Mensagem agendada com sucesso")
+    @ApiResponse(responseCode = "400", description = "Dados incorretos")
     @ApiResponse(responseCode = "409", description = "Conflito de dados")
     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     public ResponseEntity<ComunicacaoOutDTO> agendar(@RequestBody ComunicacaoInDTO dto)  {

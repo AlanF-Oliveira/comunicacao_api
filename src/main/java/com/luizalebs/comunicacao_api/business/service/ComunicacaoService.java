@@ -5,6 +5,8 @@ import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTO;
 import com.luizalebs.comunicacao_api.business.converter.ComunicacaoConverter;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.BusinessException;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.ResourceNotFoundException;
 import com.luizalebs.comunicacao_api.infraestructure.repositories.ComunicacaoRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +25,7 @@ public class ComunicacaoService {
 
     public ComunicacaoOutDTO agendarComunicacao(ComunicacaoInDTO dto) {
         if (Objects.isNull(dto)) {
-            throw new RuntimeException();
+            throw new BusinessException("Dados da mensagem inválidos.");
         }
         dto.setStatusEnvio(StatusEnvioEnum.PENDENTE);
         ComunicacaoEntity entity = converter.paraEntity(dto);
@@ -35,7 +37,7 @@ public class ComunicacaoService {
     public ComunicacaoOutDTO buscarStatusComunicacao(String emailDestinatario) {
         ComunicacaoEntity entity = repository.findByEmailDestinatario(emailDestinatario);
         if (Objects.isNull(entity)) {
-            throw new RuntimeException();
+            throw new ResourceNotFoundException("Mensagem não encontrada.");
         }
         return converter.paraDTO(entity);
     }
@@ -43,7 +45,7 @@ public class ComunicacaoService {
     public ComunicacaoOutDTO alterarStatusComunicacao(String emailDestinatario) {
         ComunicacaoEntity entity = repository.findByEmailDestinatario(emailDestinatario);
         if (Objects.isNull(entity)) {
-            throw new RuntimeException();
+            throw new ResourceNotFoundException("Mensagem não encontrada.");
         }
         entity.setStatusEnvio(StatusEnvioEnum.CANCELADO);
         repository.save(entity);
