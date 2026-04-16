@@ -23,9 +23,9 @@ public class ComunicacaoController {
     }
 
     @PostMapping("/agendar")
-    @Operation(summary = "Agendar comunicação",
-            description = "Cria uma nova comunicação. O campo data deve estar no formato: yyyy-MM-dd HH:mm:ss")
-    @ApiResponse(responseCode = "201", description = "Comunicação agendada com sucesso")
+    @Operation(summary = "Agendar mensagem",
+            description = "Cria uma nova mensagem. O campo data deve estar no formato: yyyy-MM-dd HH:mm:ss")
+    @ApiResponse(responseCode = "201", description = "Mensagem agendada com sucesso")
     @ApiResponse(responseCode = "409", description = "Conflito de dados")
     @ApiResponse(responseCode = "500", description = "Erro interno do servidor")
     public ResponseEntity<ComunicacaoOutDTO> agendar(@RequestBody ComunicacaoInDTO dto)  {
@@ -33,17 +33,17 @@ public class ComunicacaoController {
     }
 
     @GetMapping()
-    @Operation(summary = "Buscar status da comunicação", description = "Retorna o status da comunicação pelo email")
+    @Operation(summary = "Buscar status da comunicação", description = "Retorna o status da mensagem pelo email")
     @ApiResponse(responseCode = "200", description = "Status encontrado")
-    @ApiResponse(responseCode = "404", description = "Comunicação não encontrada")
+    @ApiResponse(responseCode = "404", description = "Mensagem não encontrada")
     public ResponseEntity<ComunicacaoOutDTO> buscarStatus(@RequestParam String emailDestinatario) {
         return ResponseEntity.ok(service.buscarStatusComunicacao(emailDestinatario));
     }
 
     @PatchMapping("/cancelar")
-    @Operation(summary = "Cancelar comunicação", description = "Altera o status da comunicação para cancelado")
-    @ApiResponse(responseCode = "200", description = "Comunicação cancelada com sucesso")
-    @ApiResponse(responseCode = "404", description = "Comunicação não encontrada")
+    @Operation(summary = "Cancelar mensagem", description = "Altera o status da mensagem para cancelado")
+    @ApiResponse(responseCode = "200", description = "mensagem cancelada com sucesso")
+    @ApiResponse(responseCode = "404", description = "mensagem não encontrada")
     public ResponseEntity<ComunicacaoOutDTO> cancelarStatus(@RequestParam String emailDestinatario) {
         return ResponseEntity.ok(service.alterarStatusComunicacao(emailDestinatario));
     }
