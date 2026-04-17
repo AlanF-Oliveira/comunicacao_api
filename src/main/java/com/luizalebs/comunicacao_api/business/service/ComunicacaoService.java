@@ -2,7 +2,7 @@ package com.luizalebs.comunicacao_api.business.service;
 
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoInDTO;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTO;
-import com.luizalebs.comunicacao_api.business.converter.ComunicacaoConverter;
+import com.luizalebs.comunicacao_api.business.mapper.ComunicacaoConverter;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.BusinessException;
