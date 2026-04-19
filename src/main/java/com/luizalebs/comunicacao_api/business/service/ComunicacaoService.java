@@ -11,6 +11,7 @@ import com.luizalebs.comunicacao_api.infraestructure.exceptions.ResourceNotFound
 import com.luizalebs.comunicacao_api.infraestructure.repositories.ComunicacaoRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 @Service
@@ -55,5 +56,20 @@ public class ComunicacaoService {
         repository.save(entity);
         return (converter.paraDTO(entity));
     }
+
+    public List<ComunicacaoOutDTO> buscarMensagensPendentes() {
+        List<ComunicacaoEntity> entities = repository.findAllByStatusEnvio(StatusEnvioEnum.PENDENTE);
+        return converter.paraListaDTO(entities);
+    }
+
+    public void marcarComoEnviado(String emailDestinatario) {
+        ComunicacaoEntity entity = repository.findByEmailDestinatario(emailDestinatario);
+        if (Objects.isNull(entity)) {
+            throw new ResourceNotFoundException("Mensagem não encontrada.");
+        }
+        entity.setStatusEnvio(StatusEnvioEnum.ENVIADO);
+        repository.save(entity);
+    }
+
 
 }
