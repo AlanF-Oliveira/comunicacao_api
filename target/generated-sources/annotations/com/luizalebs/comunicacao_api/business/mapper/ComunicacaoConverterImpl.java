@@ -3,12 +3,14 @@ package com.luizalebs.comunicacao_api.business.mapper;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoInDTO;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTO;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
+import java.util.ArrayList;
+import java.util.List;
 import javax.annotation.processing.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-17T19:43:29-0300",
+    date = "2026-04-18T21:44:37-0300",
     comments = "version: 1.5.5.Final, compiler: javac, environment: Java 11.0.30 (Amazon.com Inc.)"
 )
 @Component
@@ -50,5 +52,19 @@ public class ComunicacaoConverterImpl implements ComunicacaoConverter {
         comunicacaoOutDTO.statusEnvio( entity.getStatusEnvio() );
 
         return comunicacaoOutDTO.build();
+    }
+
+    @Override
+    public List<ComunicacaoOutDTO> paraListaDTO(List<ComunicacaoEntity> entities) {
+        if ( entities == null ) {
+            return null;
+        }
+
+        List<ComunicacaoOutDTO> list = new ArrayList<ComunicacaoOutDTO>( entities.size() );
+        for ( ComunicacaoEntity comunicacaoEntity : entities ) {
+            list.add( paraDTO( comunicacaoEntity ) );
+        }
+
+        return list;
     }
 }
