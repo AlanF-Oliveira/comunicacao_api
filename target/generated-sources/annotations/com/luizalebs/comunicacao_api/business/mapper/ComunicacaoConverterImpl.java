@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-04-17T19:43:29-0300",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 11.0.30 (Amazon.com Inc.)"
+    date = "2026-04-18T21:11:35-0300",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 17.0.17 (Azul Systems, Inc.)"
 )
 @Component
 public class ComunicacaoConverterImpl implements ComunicacaoConverter {
