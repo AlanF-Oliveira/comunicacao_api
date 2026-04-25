@@ -29,7 +29,7 @@ public class CronService {
             comunicacaoService.marcarComoEnviado(mensagem.getEmailDestinatario());
             log.info("Mensagem enviada para o usuário "+ mensagem.getEmailDestinatario());
         });
-        log.info("Finalizad a busca e notificacao de tarefas");
+        log.info("Finalizado a busca e notificacao de mensagens");
     }
 
 
