@@ -1,7 +1,9 @@
 package com.luizalebs.comunicacao_api.business.mapper;
 
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoInDTO;
+import com.luizalebs.comunicacao_api.api.dto.ComunicacaoInDTOFixture;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTO;
+import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTOFixture;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.ModoEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
@@ -11,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -45,24 +48,23 @@ public class ComunicacaoConverterTest {
                 .modoDeEnvio(ModoEnvioEnum.EMAIL)
                 .statusEnvio(StatusEnvioEnum.PENDENTE)
                 .build();
-        comunicacaoInDTO = ComunicacaoInDTO.builder()
-                .dataHoraEnvio(dataHora)
-                .nomeDestinatario("Alan Ferreira de Oliveira")
-                .emailDestinatario("alanf@gmail.com")
-                .telefoneDestinatario("85986546543")
-                .mensagem("Testes unitários")
-                .modoDeEnvio(ModoEnvioEnum.EMAIL)
-                .statusEnvio(StatusEnvioEnum.PENDENTE)
-                .build();
-        comunicacaoOutDTO = ComunicacaoOutDTO.builder()
-                .dataHoraEnvio(dataHora)
-                .nomeDestinatario("Alan Ferreira de Oliveira")
-                .emailDestinatario("alanf@gmail.com")
-                .telefoneDestinatario("85986546543")
-                .mensagem("Testes unitários")
-                .modoDeEnvio(ModoEnvioEnum.EMAIL)
-                .statusEnvio(StatusEnvioEnum.ENVIADO)
-                .build();
+        comunicacaoInDTO = ComunicacaoInDTOFixture.build(dataHora,
+                "Alan Ferreira de Oliveira",
+                "alanf@gmail.com",
+                "85986546543",
+                "Testes unitários",
+                ModoEnvioEnum.EMAIL,
+                StatusEnvioEnum.PENDENTE
+        );
+        comunicacaoOutDTO = ComunicacaoOutDTOFixture.build(
+                dataHora,
+                "Alan Ferreira de Oliveira",
+                "alanf@gmail.com",
+                "85986546543",
+                "Testes unitários",
+                ModoEnvioEnum.EMAIL,
+                StatusEnvioEnum.PENDENTE
+        );
 
     }
 
@@ -70,6 +72,12 @@ public class ComunicacaoConverterTest {
     void deveConverterParaComunicacaoEntity() {
         ComunicacaoEntity entity = comunicacaoConverter.paraEntity(comunicacaoInDTO);
         assertEquals(comunicacaoEntity, entity);
+    }
+
+    @Test
+    void deveConverterParaDTO() {
+        ComunicacaoOutDTO dto = comunicacaoConverter.paraDTO(comunicacaoEntity);
+        assertEquals(comunicacaoOutDTO, dto);
     }
 
 }
