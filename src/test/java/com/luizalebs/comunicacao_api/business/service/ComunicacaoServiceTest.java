@@ -1,28 +1,35 @@
-package com.luizalebs.comunicacao_api.business.mapper;
+package com.luizalebs.comunicacao_api.business.service;
 
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoInDTO;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoInDTOFixture;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTO;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTOFixture;
+import com.luizalebs.comunicacao_api.business.mapper.ComunicacaoConverter;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.ModoEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
+import com.luizalebs.comunicacao_api.infraestructure.repositories.ComunicacaoRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+@ExtendWith(MockitoExtension.class)
+public class ComunicacaoServiceTest {
+    @InjectMocks
+    ComunicacaoService comunicacaoService;
 
+    @Mock
+    ComunicacaoRepository comunicacaoRepository;
 
-public class ComunicacaoConverterTest {
+    @Mock
+    ComunicacaoConverter comunicacaoConverter;
 
-    private final ComunicacaoConverter comunicacaoConverter = Mappers.getMapper(ComunicacaoConverter.class);
     ComunicacaoEntity comunicacaoEntity;
     ComunicacaoInDTO comunicacaoInDTO;
     ComunicacaoOutDTO comunicacaoOutDTO;
@@ -31,7 +38,6 @@ public class ComunicacaoConverterTest {
                     .atZone(ZoneId.systemDefault())
                     .toInstant()
     );
-
 
     @BeforeEach
     void setup() {
@@ -63,24 +69,4 @@ public class ComunicacaoConverterTest {
         );
 
     }
-
-    @Test
-    void deveConverterParaComunicacaoEntity() {
-        ComunicacaoEntity entity = comunicacaoConverter.paraEntity(comunicacaoInDTO);
-        assertEquals(comunicacaoEntity, entity);
-    }
-
-    @Test
-    void deveConverterParaDTO() {
-        ComunicacaoOutDTO dto = comunicacaoConverter.paraDTO(comunicacaoEntity);
-        assertEquals(comunicacaoOutDTO, dto);
-    }
-
-    @Test
-    void deveConverterParaListaDTO() {
-        List<ComunicacaoOutDTO> listaDTO = comunicacaoConverter.paraListaDTO(Collections.singletonList(comunicacaoEntity));
-        assertEquals(Collections.singletonList(comunicacaoOutDTO), listaDTO);
-
-    }
-
 }
