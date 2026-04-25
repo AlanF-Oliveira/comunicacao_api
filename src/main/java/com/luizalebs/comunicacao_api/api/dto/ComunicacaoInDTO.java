@@ -16,7 +16,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ToString
-public class    ComunicacaoInDTO implements Serializable {
+@EqualsAndHashCode
+public class   ComunicacaoInDTO implements Serializable {
 
     @Schema(
             description = "Data e hora do envio",
