@@ -9,6 +9,7 @@ import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.ModoEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.BusinessException;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.ConflictException;
 import com.luizalebs.comunicacao_api.infraestructure.repositories.ComunicacaoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,8 +27,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ComunicacaoServiceTest {
@@ -48,6 +48,7 @@ public class ComunicacaoServiceTest {
                     .atZone(ZoneId.systemDefault())
                     .toInstant()
     );
+    String email;
 
     @BeforeEach
     void setup() {
@@ -77,6 +78,7 @@ public class ComunicacaoServiceTest {
                 ModoEnvioEnum.EMAIL,
                 StatusEnvioEnum.PENDENTE
         );
+        email = "alanf@gmail.com";
     }
 
     @Test
@@ -87,6 +89,16 @@ public class ComunicacaoServiceTest {
         verifyNoInteractions(comunicacaoConverter, comunicacaoRepository);
     }
 
+    @Test
+    void naoDeveSalvarCasoEmailExistente(){
+        when(comunicacaoRepository.existsByEmailDestinatario(comunicacaoInDTO.getEmailDestinatario())).thenReturn(true);
+        ConflictException e  = assertThrows(ConflictException.class,
+        () ->comunicacaoService.agendarComunicacao(comunicacaoInDTO));
+        assertThat(e.getMessage(), is("Já existe uma mensagem com este e-mail."));
+        verify(comunicacaoRepository).existsByEmailDestinatario(comunicacaoInDTO.getEmailDestinatario());
+        verifyNoInteractions(comunicacaoConverter);
+
+    }
 
     @Test
     void deveAgendarComunicacao() {
