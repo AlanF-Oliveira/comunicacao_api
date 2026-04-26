@@ -26,6 +26,7 @@ import java.util.Date;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
@@ -103,6 +104,16 @@ public class ComunicacaoServiceTest {
     @Test
     void deveAgendarComunicacao() {
         when(comunicacaoRepository.existsByEmailDestinatario(comunicacaoInDTO.getEmailDestinatario())).thenReturn(false);
+        when(comunicacaoConverter.paraEntity(comunicacaoInDTO)).thenReturn(comunicacaoEntity);
+        when(comunicacaoRepository.save(comunicacaoEntity)).thenReturn(comunicacaoEntity);
+        when(comunicacaoConverter.paraDTO(comunicacaoEntity)).thenReturn(comunicacaoOutDTO);
+        ComunicacaoOutDTO dto = comunicacaoService.agendarComunicacao(comunicacaoInDTO);
+        assertEquals(comunicacaoOutDTO, dto);
+        verify(comunicacaoRepository).existsByEmailDestinatario(comunicacaoInDTO.getEmailDestinatario());
+        verify(comunicacaoConverter).paraEntity(comunicacaoInDTO);
+        verify(comunicacaoRepository).save(comunicacaoEntity);
+        verify(comunicacaoConverter).paraDTO(comunicacaoEntity);
+        verifyNoMoreInteractions(comunicacaoRepository, comunicacaoConverter);
     }
 
 }
