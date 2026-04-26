@@ -123,4 +123,14 @@ public class ComunicacaoServiceTest {
         verifyNoInteractions(comunicacaoConverter);
     }
 
+    @Test
+    void deveBuscarStatusComunicacao(){
+        when(comunicacaoRepository.findByEmailDestinatario(email)).thenReturn(comunicacaoEntity);
+        when(comunicacaoConverter.paraDTO(comunicacaoEntity)).thenReturn(comunicacaoOutDTO);
+        ComunicacaoOutDTO dto = comunicacaoService.buscarStatusComunicacao(email);
+        assertEquals(comunicacaoOutDTO, dto);
+        verify(comunicacaoRepository).findByEmailDestinatario(email);
+        verify(comunicacaoConverter).paraDTO(comunicacaoEntity);
+        verifyNoMoreInteractions(comunicacaoRepository, comunicacaoConverter);
+    }
 }
