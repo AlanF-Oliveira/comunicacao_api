@@ -10,6 +10,7 @@ import com.luizalebs.comunicacao_api.infraestructure.enums.ModoEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.BusinessException;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.ConflictException;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.ResourceNotFoundException;
 import com.luizalebs.comunicacao_api.infraestructure.repositories.ComunicacaoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cache.support.NullValue;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -25,7 +25,6 @@ import java.util.Date;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
@@ -114,6 +113,14 @@ public class ComunicacaoServiceTest {
         verify(comunicacaoRepository).save(comunicacaoEntity);
         verify(comunicacaoConverter).paraDTO(comunicacaoEntity);
         verifyNoMoreInteractions(comunicacaoRepository, comunicacaoConverter);
+    }
+
+    @Test
+    void naoDeveBuscarCasoEmailNull() {
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
+                () -> comunicacaoService.buscarStatusComunicacao(null));
+        assertThat(e.getMessage(), is("Mensagem não encontrada."));
+        verifyNoInteractions(comunicacaoConverter);
     }
 
 }
