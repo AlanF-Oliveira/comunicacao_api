@@ -133,4 +133,14 @@ public class ComunicacaoServiceTest {
         verify(comunicacaoConverter).paraDTO(comunicacaoEntity);
         verifyNoMoreInteractions(comunicacaoRepository, comunicacaoConverter);
     }
+
+    @Test
+    void naoDeveaAlterarStatusComunicacaoCasoEmailNulo() {
+        when(comunicacaoRepository.findByEmailDestinatario(null)).thenReturn(null);
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
+                () -> comunicacaoService.alterarStatusComunicacao(null));
+        assertThat(e.getMessage(), is("Mensagem não encontrada."));
+        verify(comunicacaoRepository).findByEmailDestinatario(null);
+        verifyNoInteractions(comunicacaoConverter);
+    }
 }
