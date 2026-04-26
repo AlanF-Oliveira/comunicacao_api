@@ -143,4 +143,18 @@ public class ComunicacaoServiceTest {
         verify(comunicacaoRepository).findByEmailDestinatario(null);
         verifyNoInteractions(comunicacaoConverter);
     }
+
+    @Test
+    void deveAlterarStatusComunicacao(){
+        when(comunicacaoRepository.findByEmailDestinatario(email)).thenReturn(comunicacaoEntity);
+        when(comunicacaoRepository.save(comunicacaoEntity)).thenReturn(comunicacaoEntity);
+        when(comunicacaoConverter.paraDTO(comunicacaoEntity)).thenReturn(comunicacaoOutDTO);
+        ComunicacaoOutDTO dto = comunicacaoService.alterarStatusComunicacao(email);
+        assertEquals(StatusEnvioEnum.CANCELADO, comunicacaoEntity.getStatusEnvio());
+        assertEquals(comunicacaoOutDTO, dto);
+        verify(comunicacaoRepository).findByEmailDestinatario(email);
+        verify(comunicacaoRepository).save(comunicacaoEntity);
+        verify(comunicacaoConverter).paraDTO(comunicacaoEntity);
+        verifyNoMoreInteractions(comunicacaoConverter, comunicacaoRepository);
+    }
 }
