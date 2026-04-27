@@ -22,11 +22,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -91,7 +91,7 @@ public class ComunicacaoServiceTest {
 
     @Test
     void naoDeveSalvarCasoEmailExistente(){
-        when(comunicacaoRepository.existsByEmailDestinatario(comunicacaoInDTO.getEmailDestinatario())).thenReturn(true);
+        when(comunicacaoRepository.existsByEmailDestinatario(email)).thenReturn(true);
         ConflictException e  = assertThrows(ConflictException.class,
         () ->comunicacaoService.agendarComunicacao(comunicacaoInDTO));
         assertThat(e.getMessage(), is("Já existe uma mensagem com este e-mail."));
@@ -117,8 +117,9 @@ public class ComunicacaoServiceTest {
 
     @Test
     void naoDeveBuscarCasoEmailNull() {
+        String email = null;
         ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
-                () -> comunicacaoService.buscarStatusComunicacao(null));
+                () -> comunicacaoService.buscarStatusComunicacao(email));
         assertThat(e.getMessage(), is("Mensagem não encontrada."));
         verifyNoInteractions(comunicacaoConverter);
     }
@@ -136,11 +137,11 @@ public class ComunicacaoServiceTest {
 
     @Test
     void naoDeveaAlterarStatusComunicacaoCasoEmailNulo() {
-        when(comunicacaoRepository.findByEmailDestinatario(null)).thenReturn(null);
+        String email = null;
         ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
-                () -> comunicacaoService.alterarStatusComunicacao(null));
+                () -> comunicacaoService.alterarStatusComunicacao(email));
         assertThat(e.getMessage(), is("Mensagem não encontrada."));
-        verify(comunicacaoRepository).findByEmailDestinatario(null);
+        verify(comunicacaoRepository).findByEmailDestinatario(email);
         verifyNoInteractions(comunicacaoConverter);
     }
 
@@ -156,5 +157,28 @@ public class ComunicacaoServiceTest {
         verify(comunicacaoRepository).save(comunicacaoEntity);
         verify(comunicacaoConverter).paraDTO(comunicacaoEntity);
         verifyNoMoreInteractions(comunicacaoConverter, comunicacaoRepository);
+    }
+
+    @Test
+    void deveBuscarMensagemPendente(){
+
+        when(comunicacaoRepository.findAllByStatusEnvio(StatusEnvioEnum.PENDENTE)).
+                thenReturn(List.of(comunicacaoEntity));
+        when(comunicacaoConverter.paraListaDTO(
+                List.of(comunicacaoEntity)))
+                .thenReturn(List.of(comunicacaoOutDTO));
+        List<ComunicacaoOutDTO> dto = comunicacaoService.buscarMensagensPendentes();
+        assertEquals(1,dto.size());
+        assertTrue(dto.contains(comunicacaoOutDTO));
+    }
+
+    @Test
+    void naoDeveMarcarComoEnviadoCasoEmailNull(){
+        String email = null;
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
+                () -> comunicacaoService.marcarComoEnviado(email));
+        assertThat(e.getMessage(), is("Mensagem não encontrada."));
+        verify(comunicacaoRepository).findByEmailDestinatario(email);
+        verifyNoMoreInteractions(comunicacaoRepository);
     }
 }
