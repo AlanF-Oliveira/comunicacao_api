@@ -181,4 +181,15 @@ public class ComunicacaoServiceTest {
         verify(comunicacaoRepository).findByEmailDestinatario(email);
         verifyNoMoreInteractions(comunicacaoRepository);
     }
+
+    @Test
+    void deveMarcarComoEnviado(){
+        when(comunicacaoRepository.findByEmailDestinatario(email)).thenReturn(comunicacaoEntity);
+        when(comunicacaoRepository.save(comunicacaoEntity)).thenReturn(comunicacaoEntity);
+        comunicacaoService.marcarComoEnviado(email);
+        assertEquals(StatusEnvioEnum.ENVIADO, comunicacaoEntity.getStatusEnvio());
+        verify(comunicacaoRepository).findByEmailDestinatario(email);
+        verify(comunicacaoRepository).save(comunicacaoEntity);
+        verifyNoMoreInteractions(comunicacaoRepository);
+    }
 }
