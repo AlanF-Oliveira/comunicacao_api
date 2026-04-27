@@ -22,11 +22,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
+import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -156,5 +156,18 @@ public class ComunicacaoServiceTest {
         verify(comunicacaoRepository).save(comunicacaoEntity);
         verify(comunicacaoConverter).paraDTO(comunicacaoEntity);
         verifyNoMoreInteractions(comunicacaoConverter, comunicacaoRepository);
+    }
+
+    @Test
+    void deveBuscarMensagemPendente(){
+
+        when(comunicacaoRepository.findAllByStatusEnvio(StatusEnvioEnum.PENDENTE)).
+                thenReturn(List.of(comunicacaoEntity));
+        when(comunicacaoConverter.paraListaDTO(
+                List.of(comunicacaoEntity)))
+                .thenReturn(List.of(comunicacaoOutDTO));
+        List<ComunicacaoOutDTO> dto = comunicacaoService.buscarMensagensPendentes();
+        assertEquals(1,dto.size());
+        assertTrue(dto.contains(comunicacaoOutDTO));
     }
 }
