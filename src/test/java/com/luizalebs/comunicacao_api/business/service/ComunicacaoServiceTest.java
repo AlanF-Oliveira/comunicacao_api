@@ -91,7 +91,7 @@ public class ComunicacaoServiceTest {
 
     @Test
     void naoDeveSalvarCasoEmailExistente(){
-        when(comunicacaoRepository.existsByEmailDestinatario(comunicacaoInDTO.getEmailDestinatario())).thenReturn(true);
+        when(comunicacaoRepository.existsByEmailDestinatario(email)).thenReturn(true);
         ConflictException e  = assertThrows(ConflictException.class,
         () ->comunicacaoService.agendarComunicacao(comunicacaoInDTO));
         assertThat(e.getMessage(), is("Já existe uma mensagem com este e-mail."));
@@ -117,8 +117,9 @@ public class ComunicacaoServiceTest {
 
     @Test
     void naoDeveBuscarCasoEmailNull() {
+        String email = null;
         ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
-                () -> comunicacaoService.buscarStatusComunicacao(null));
+                () -> comunicacaoService.buscarStatusComunicacao(email));
         assertThat(e.getMessage(), is("Mensagem não encontrada."));
         verifyNoInteractions(comunicacaoConverter);
     }
@@ -136,11 +137,11 @@ public class ComunicacaoServiceTest {
 
     @Test
     void naoDeveaAlterarStatusComunicacaoCasoEmailNulo() {
-        when(comunicacaoRepository.findByEmailDestinatario(null)).thenReturn(null);
+        String email = null;
         ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
-                () -> comunicacaoService.alterarStatusComunicacao(null));
+                () -> comunicacaoService.alterarStatusComunicacao(email));
         assertThat(e.getMessage(), is("Mensagem não encontrada."));
-        verify(comunicacaoRepository).findByEmailDestinatario(null);
+        verify(comunicacaoRepository).findByEmailDestinatario(email);
         verifyNoInteractions(comunicacaoConverter);
     }
 
@@ -169,5 +170,15 @@ public class ComunicacaoServiceTest {
         List<ComunicacaoOutDTO> dto = comunicacaoService.buscarMensagensPendentes();
         assertEquals(1,dto.size());
         assertTrue(dto.contains(comunicacaoOutDTO));
+    }
+
+    @Test
+    void naoDeveMarcarComoEnviadoCasoEmailNull(){
+        String email = null;
+        ResourceNotFoundException e = assertThrows(ResourceNotFoundException.class,
+                () -> comunicacaoService.marcarComoEnviado(email));
+        assertThat(e.getMessage(), is("Mensagem não encontrada."));
+        verify(comunicacaoRepository).findByEmailDestinatario(email);
+        verifyNoMoreInteractions(comunicacaoRepository);
     }
 }
