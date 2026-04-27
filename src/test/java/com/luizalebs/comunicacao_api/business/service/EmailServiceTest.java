@@ -3,22 +3,30 @@ package com.luizalebs.comunicacao_api.business.service;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoInDTOFixture;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTO;
 import com.luizalebs.comunicacao_api.api.dto.ComunicacaoOutDTOFixture;
+import com.luizalebs.comunicacao_api.infraestructure.client.EmailClient;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.ModoEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 public class EmailServiceTest {
     @InjectMocks
     EmailService emailService;
+
+    @Mock
+    private EmailClient client;
 
     ComunicacaoOutDTO comunicacaoOutDTO;
     private final Date dataHora = Date.from(
@@ -40,5 +48,12 @@ public class EmailServiceTest {
                 StatusEnvioEnum.PENDENTE
         );
         email = "alanf@gmail.com";
+    }
+
+    @Test
+    void deveEnviarMensagem(){
+        emailService.enviarMensagem(comunicacaoOutDTO);
+        verify(client).enviarMensagem(comunicacaoOutDTO);
+        verifyNoMoreInteractions(client);
     }
 }
