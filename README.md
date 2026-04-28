@@ -1,130 +1,200 @@
-# comunicacao_api
+# Comunicação API
 
-API REST para agendamento, consulta de status e cancelamento de comunicacoes (email, SMS, push e WhatsApp).
+API REST para agendamento e gerenciamento de comunicações, desenvolvida com Spring Boot e MySQL.
+O sistema permite agendar mensagens, consultar status e cancelar comunicações, com envio automático via integração com serviço externo de e-mail.
 
-## Stack
+---
+
+## Tecnologias
 
 - Java 11
 - Spring Boot 2.7.0
-- Spring Web
 - Spring Data JPA
-- MySQL
+- Spring Cloud OpenFeign
+- MySQL 8.0
 - Lombok
-- Springdoc OpenAPI (Swagger UI)
-- Maven Wrapper
+- MapStruct
+- Springdoc OpenAPI (Swagger)
+- Docker / Docker Compose
+- JUnit 5 + Mockito
 
-## Arquitetura atual
+---
 
-O projeto segue separacao por camadas:
+## Como rodar o projeto
 
-- `api`: controllers e DTOs
-- `business`: regras de negocio (`service`) e conversao DTO <-> Entity (`converter`)
-- `infraestructure`: entidades JPA, enums, repositorio e tratamento global de excecoes
+### Pré-requisitos
+- Docker Desktop instalado e rodando
 
-## Requisitos
-
-- JDK 11
-- MySQL em execucao local
-
-## Configuracao
-
-Arquivo: `src/main/resources/application.properties`
-
-```properties
-spring.datasource.url=jdbc:mysql://localhost:3306/comunicacao1?createDatabaseIfNotExist=true
-spring.datasource.username=root
-spring.datasource.password=2010
-spring.jpa.hibernate.ddl-auto=update
-spring.mvc.pathmatch.matching-strategy=ant_path_matcher
-spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL57Dialect
-spring.jpa.properties.hibernate.globally_quoted_identifiers=true
-```
-
-> Recomendado: alterar credenciais antes de subir o projeto para qualquer ambiente compartilhado.
-
-## Como rodar
-
-Na raiz do projeto:
+### Subindo a aplicação
 
 ```bash
-./mvnw spring-boot:run
+docker compose up --build
 ```
 
-No Windows:
+A aplicação estará disponível em: `http://localhost:8080`
 
-```powershell
-.\mvnw.cmd spring-boot:run
-```
+Documentação Swagger: `http://localhost:8080/swagger-ui/index.html`
 
-## Swagger / OpenAPI
+> O `--build` é necessário na primeira vez ou após alterações no código.
+> Nas execuções seguintes, pode usar apenas `docker compose up`.
 
-Com a aplicacao rodando:
-
-- Swagger UI: `http://localhost:8080/swagger-ui/index.html`
-- JSON OpenAPI: `http://localhost:8080/v3/api-docs`
+---
 
 ## Endpoints
 
-Base path: `/comunicacao`
+### POST /comunicacao/agendar
+Agenda uma nova comunicação. O status é definido automaticamente como `PENDENTE`.
 
-| Metodo | Rota | Descricao |
-|---|---|---|
-| POST | `/comunicacao/agendar` | Agenda uma nova comunicacao |
-| GET | `/comunicacao?emailDestinatario={email}` | Consulta status da comunicacao por email |
-| PATCH | `/comunicacao/cancelar?emailDestinatario={email}` | Cancela uma comunicacao existente |
-
-### Exemplo - agendar comunicacao
-
-`POST /comunicacao/agendar`
-
+**Request Body:**
 ```json
 {
-  "dataHoraEnvio": "2026-04-15 22:42:59",
-  "nomeDestinatario": "Alan",
+  "dataHoraEnvio": "2026-04-24 13:56:20",
+  "nomeDestinatario": "Alan Ferreira",
   "emailDestinatario": "alan@email.com",
-  "telefoneDestinatario": "11999999999",
-  "mensagem": "Lembrete da tarefa",
+  "telefoneDestinatario": "85986546543",
+  "mensagem": "Sua mensagem aqui",
   "modoDeEnvio": "EMAIL"
 }
 ```
 
-## Regras de negocio atuais
+**Respostas:**
+| Status | Descrição |
+|--------|-----------|
+| `200 OK` | Comunicação agendada com sucesso |
+| `400 Bad Request` | JSON inválido ou ausente |
+| `409 Conflict` | Já existe uma comunicação com este e-mail |
+| `500 Internal Server Error` | Erro interno do servidor |
 
-- `statusEnvio` e definido no backend como `PENDENTE` no agendamento.
-- Nao e permitido cadastrar duas comunicacoes com o mesmo `emailDestinatario`.
-- Ao cancelar, o status e alterado para `CANCELADO`.
-- Se o email nao for encontrado, a API retorna erro de recurso nao encontrado.
+---
+
+### GET /comunicacao
+Busca o status de uma comunicação pelo e-mail do destinatário.
+
+**Query Param:**
+- `emailDestinatario` (obrigatório) — E-mail do destinatário
+
+**Exemplo:**
+```
+GET /comunicacao?emailDestinatario=alan@email.com
+```
+
+**Respostas:**
+| Status | Descrição |
+|--------|-----------|
+| `200 OK` | Retorna os dados da comunicação |
+| `404 Not Found` | Comunicação não encontrada |
+
+---
+
+### PATCH /comunicacao/cancelar
+Cancela uma comunicação agendada, alterando seu status para `CANCELADO`.
+
+**Query Param:**
+- `emailDestinatario` (obrigatório) — E-mail do destinatário
+
+**Exemplo:**
+```
+PATCH /comunicacao/cancelar?emailDestinatario=alan@email.com
+```
+
+**Respostas:**
+| Status | Descrição |
+|--------|-----------|
+| `200 OK` | Comunicação cancelada com sucesso |
+| `404 Not Found` | Comunicação não encontrada |
+
+---
 
 ## Enums
 
-### `ModoEnvioEnum`
+### Modos de Envio (`modoDeEnvio`)
+| Valor | Descrição |
+|-------|-----------|
+| `EMAIL` | Envio por e-mail |
+| `SMS` | Envio por SMS |
+| `PUSH` | Notificação push |
+| `WHATSAPP` | Envio via WhatsApp |
 
-- `EMAIL`
-- `SMS`
-- `PUSH`
-- `WHATSAPP`
+### Status de Envio (`statusEnvio`)
+| Valor | Descrição |
+|-------|-----------|
+| `PENDENTE` | Aguardando envio |
+| `ENVIADO` | Comunicação enviada com sucesso |
+| `CANCELADO` | Comunicação cancelada |
 
-### `StatusEnvioEnum`
+---
 
-- `PENDENTE`
-- `ENVIADO`
-- `CANCELADO`
+## Envio Automático
 
-## Respostas de erro (handler global)
+A aplicação possui um job agendado (`CronService`) que executa a cada minuto buscando todas as comunicações com status `PENDENTE` e as envia via integração com um serviço externo de e-mail (`EmailClient` via OpenFeign).
 
-- `400 Bad Request` - dados invalidos / JSON invalido
-- `404 Not Found` - mensagem nao encontrada
-- `409 Conflict` - email ja cadastrado
-- `502 Bad Gateway` - erro de servico externo
+Após o envio, o status é atualizado automaticamente para `ENVIADO`.
 
-## Testes
-
-```bash
-./mvnw test
+A URL do serviço externo é configurada via `application.properties`:
+```properties
+notificacao.url=http://localhost:8082/email/mensagem
 ```
 
-No Windows:
+---
 
-```powershell
-.\mvnw.cmd test
+## Testes Unitários
+
+O projeto possui cobertura de testes unitários com JUnit 5 e Mockito nas seguintes camadas:
+
+### ComunicacaoControllerTest
+Testa os endpoints da API utilizando `MockMvc` com `standaloneSetup` e `GlobalExceptionHandler` registrado.
+
+| Teste | Descrição |
+|-------|-----------|
+| `deveAgendarUsuarioComSucesso` | Agendamento com dados válidos retorna `200` |
+| `naoDeveAgendarUsuarioCasoJsonNull` | Body ausente retorna `400` sem chamar a service |
+| `naoDeveAgenfarCasoEmailExistente` | E-mail duplicado retorna `409` |
+| `deveBuscarStatusComunicacaoComSucesso` | Busca por e-mail existente retorna `200` |
+| `naoDeveBuscarStatusDaComunicacaoCasoEmailInexistente` | Busca por e-mail inexistente retorna `404` |
+| `deveCancelarStatusDaComunicacaoComSucesso` | Cancelamento com e-mail válido retorna `200` |
+| `naoDeveCancelarStatusDaComunicacaoCasoEmailInexistente` | Cancelamento com e-mail inexistente retorna `404` |
+
+### ComunicacaoServiceTest
+Testa a lógica de negócio com repositório e converter mockados.
+
+| Teste | Descrição |
+|-------|-----------|
+| `deveAgendarComunicacao` | Fluxo completo de agendamento funciona corretamente |
+| `naoDeveSalvarDTONulo` | DTO nulo lança `BusinessException` |
+| `naoDeveSalvarCasoEmailExistente` | E-mail duplicado lança `ConflictException` |
+| `deveBuscarStatusComunicacao` | Busca por e-mail existente retorna o DTO correto |
+| `naoDeveBuscarCasoEmailNull` | E-mail nulo lança `ResourceNotFoundException` |
+| `deveAlterarStatusComunicacao` | Status é alterado para `CANCELADO` corretamente |
+| `naoDeveaAlterarStatusComunicacaoCasoEmailNulo` | E-mail nulo lança `ResourceNotFoundException` |
+| `deveBuscarMensagemPendente` | Busca mensagens com status `PENDENTE` retorna lista correta |
+| `deveMarcarComoEnviado` | Status é alterado para `ENVIADO` corretamente |
+| `naoDeveMarcarComoEnviadoCasoEmailNull` | E-mail nulo lança `ResourceNotFoundException` |
+
+### ComunicacaoConverterTest
+Testa o mapper MapStruct de conversão entre DTOs e entidade.
+
+| Teste | Descrição |
+|-------|-----------|
+| `deveConverterParaComunicacaoEntity` | Converte `ComunicacaoInDTO` para `ComunicacaoEntity` corretamente |
+| `deveConverterParaDTO` | Converte `ComunicacaoEntity` para `ComunicacaoOutDTO` corretamente |
+| `deveConverterParaListaDTO` | Converte lista de entidades para lista de DTOs corretamente |
+
+### CronServiceTest
+Testa o job agendado de envio de mensagens pendentes.
+
+| Teste | Descrição |
+|-------|-----------|
+| `deveBuscarPorMensagensPendentes` | Mensagens pendentes são buscadas, enviadas e marcadas como enviadas |
+
+### EmailServiceTest
+Testa o serviço de envio via client Feign.
+
+| Teste | Descrição |
+|-------|-----------|
+| `deveEnviarMensagem` | Client Feign é chamado corretamente ao enviar mensagem |
+
+---
+
+## Estrutura do Projeto
+
 ```
