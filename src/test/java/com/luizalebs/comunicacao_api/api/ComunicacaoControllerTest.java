@@ -88,4 +88,12 @@ public class ComunicacaoControllerTest {
         verifyNoMoreInteractions(comunicacaoService);
     }
 
+    @Test
+    void naoDeveAgendarUsuarioCasoJsonNull() throws Exception {
+        mockMvc.perform(post("/comunicacao/agendar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isBadRequest());
+        verifyNoInteractions(comunicacaoService);
+    }
 }
