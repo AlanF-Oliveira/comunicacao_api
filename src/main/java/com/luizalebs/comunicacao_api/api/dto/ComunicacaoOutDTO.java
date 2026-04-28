@@ -14,7 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @ToString
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude = "statusEnvio")
 public class ComunicacaoOutDTO implements Serializable {
 
 
