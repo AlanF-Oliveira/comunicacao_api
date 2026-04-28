@@ -11,6 +11,8 @@ import com.luizalebs.comunicacao_api.business.service.ComunicacaoService;
 import com.luizalebs.comunicacao_api.infraestructure.entities.ComunicacaoEntity;
 import com.luizalebs.comunicacao_api.infraestructure.enums.ModoEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.ConflictException;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.GlobalExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,7 +55,11 @@ public class ComunicacaoControllerTest {
     @BeforeEach
     void setup () throws JsonProcessingException {
         url = "/comunicacao";
-        mockMvc = MockMvcBuilders.standaloneSetup(comunicacaoController).alwaysDo(print()).build();
+        mockMvc = MockMvcBuilders
+                .standaloneSetup(comunicacaoController)
+                .setControllerAdvice(new GlobalExceptionHandler()) // ← adiciona isso
+                .alwaysDo(print())
+                .build();
         comunicacaoInDTO = ComunicacaoInDTOFixture.build(dataHora,
                 "Alan Ferreira de Oliveira",
                 "alanf@gmail.com",
@@ -96,4 +102,17 @@ public class ComunicacaoControllerTest {
         ).andExpect(status().isBadRequest());
         verifyNoInteractions(comunicacaoService);
     }
+
+    @Test
+    void naoDeveAgenfarCasoEmailExistente() throws Exception {
+        when(comunicacaoService.agendarComunicacao(comunicacaoInDTO))
+                .thenThrow(new ConflictException("Já existe uma mensagem com este e-mail."));
+        mockMvc.perform(post("/comunicacao/agendar")
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(json)
+        ).andExpect(status().isConflict());
+        verify(comunicacaoService).agendarComunicacao(comunicacaoInDTO);
+    }
+
 }
