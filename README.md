@@ -203,7 +203,7 @@ Testa o serviço de envio via client Feign.
 O projeto utiliza **GitHub Actions** para integração contínua. O pipeline é executado automaticamente nos seguintes eventos:
 
 **Triggers:**
-- Push nas branches `main`, `develop` e `feature/**`
+- Push nas branches `main` e `develop`
 - Pull Request para `main` e `develop`
 
 **Etapas do pipeline:**
