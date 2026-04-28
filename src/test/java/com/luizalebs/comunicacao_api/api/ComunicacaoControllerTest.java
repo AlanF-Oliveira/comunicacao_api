@@ -154,6 +154,18 @@ public class ComunicacaoControllerTest {
         verifyNoMoreInteractions(comunicacaoService);
     }
 
+    @Test
+    void deveCancelarStatusDaComunicacaoComSucesso() throws Exception {
+        when(comunicacaoService.alterarStatusComunicacao(email))
+                .thenReturn(comunicacaoOutDTO);
+        mockMvc.perform(patch("/comunicacao/cancelar")
+                .param("emailDestinatario", "alanf@gmail.com")
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        verify(comunicacaoService).alterarStatusComunicacao(email);
+        verifyNoMoreInteractions(comunicacaoService);
+    }
+
 
 
 }
