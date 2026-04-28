@@ -2,7 +2,7 @@ name: CI - Comunicacao API
 
 on:
   push:
-    branches: [ "main", "develop", "feature/**" ]
+    branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
 
@@ -23,5 +23,5 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Build with Maven (sem testes por enquanto)
-        run: mvn clean package -DskipTests
+      - name: Build and Test
+        run: mvn clean package
