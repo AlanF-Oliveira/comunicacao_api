@@ -126,7 +126,7 @@ PATCH /comunicacao/cancelar?emailDestinatario=alan@email.com
 
 ## Envio Automático
 
-A aplicação possui um job agendado (`CronService`) que executa a cada minuto buscando todas as comunicações com status `PENDENTE` e as envia via integração com um serviço externo de e-mail (`EmailClient` via OpenFeign).
+A aplicação possui uma tarefa agendada (`CronService`) que executa a cada minuto buscando todas as comunicações com status `PENDENTE` e as envia via integração com um serviço externo de e-mail (`EmailClient` via OpenFeign).
 
 Após o envio, o status é atualizado automaticamente para `ENVIADO`.
 
@@ -134,6 +134,9 @@ A URL do serviço externo é configurada via `application.properties`:
 ```properties
 notificacao.url=http://localhost:8082/email/mensagem
 ```
+
+> Este serviço depende da aplicação de notificação rodando em paralelo.
+> Repositório: [notificacao](https://github.com/AlanF-Oliveira/notificacao)
 
 ---
 
@@ -180,7 +183,7 @@ Testa o mapper MapStruct de conversão entre DTOs e entidade.
 | `deveConverterParaListaDTO` | Converte lista de entidades para lista de DTOs corretamente |
 
 ### CronServiceTest
-Testa o job agendado de envio de mensagens pendentes.
+Testa a tarefa agendada de envio de mensagens pendentes.
 
 | Teste | Descrição |
 |-------|-----------|
@@ -195,6 +198,19 @@ Testa o serviço de envio via client Feign.
 
 ---
 
-## Estrutura do Projeto
+## CI/CD
 
-```
+O projeto utiliza **GitHub Actions** para integração contínua. O pipeline é executado automaticamente nos seguintes eventos:
+
+**Triggers:**
+- Push nas branches `main`, `develop` e `feature/**`
+- Pull Request para `main` e `develop`
+
+**Etapas do pipeline:**
+1. Checkout do código
+2. Configuração do JDK 11 (Temurin)
+3. Build e execução dos testes com Maven (`mvn clean package`)
+
+O arquivo de configuração está em `.github/workflows/maven.yml`.
+
+---
