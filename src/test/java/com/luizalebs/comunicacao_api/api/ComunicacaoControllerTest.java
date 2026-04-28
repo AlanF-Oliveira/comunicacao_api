@@ -13,6 +13,7 @@ import com.luizalebs.comunicacao_api.infraestructure.enums.ModoEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.enums.StatusEnvioEnum;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.ConflictException;
 import com.luizalebs.comunicacao_api.infraestructure.exceptions.GlobalExceptionHandler;
+import com.luizalebs.comunicacao_api.infraestructure.exceptions.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -113,6 +114,19 @@ public class ComunicacaoControllerTest {
                 .content(json)
         ).andExpect(status().isConflict());
         verify(comunicacaoService).agendarComunicacao(comunicacaoInDTO);
+        verifyNoMoreInteractions(comunicacaoService);
+    }
+
+    @Test
+    void naoDeveBuscarStatusDaComunicacaoCasoEmailInexistente() throws Exception {
+        when(comunicacaoService.buscarStatusComunicacao(email))
+                .thenThrow(new ResourceNotFoundException("Mensagem não encontrada."));
+        mockMvc.perform(get("/comunicacao")
+                .param("emailDestinatario", "alanf@gmail.com")
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNotFound());
+        verify(comunicacaoService).buscarStatusComunicacao(email);
+        verifyNoMoreInteractions(comunicacaoService);
     }
 
 }
