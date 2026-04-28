@@ -53,8 +53,9 @@ public class ComunicacaoControllerTest {
     );
     String email;
     MockMvc mockMvc;
+
     @BeforeEach
-    void setup () throws JsonProcessingException {
+    void setup() throws JsonProcessingException {
         url = "/comunicacao";
         mockMvc = MockMvcBuilders
                 .standaloneSetup(comunicacaoController)
@@ -128,5 +129,31 @@ public class ComunicacaoControllerTest {
         verify(comunicacaoService).buscarStatusComunicacao(email);
         verifyNoMoreInteractions(comunicacaoService);
     }
+
+    @Test
+    void deveBuscarStatusComunicacaoComSucesso() throws Exception {
+        when(comunicacaoService.buscarStatusComunicacao(email))
+                .thenReturn(comunicacaoOutDTO);
+        mockMvc.perform(get("/comunicacao")
+                .param("emailDestinatario", "alanf@gmail.com")
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isOk());
+        verify(comunicacaoService).buscarStatusComunicacao(email);
+        verifyNoMoreInteractions(comunicacaoService);
+    }
+
+    @Test
+    void naoDeveCancelarStatusDaComunicacaoCasoEmailInexistente() throws Exception {
+        when(comunicacaoService.alterarStatusComunicacao(email))
+                .thenThrow(new ResourceNotFoundException("Mensagem não encontrada."));
+        mockMvc.perform(patch("/comunicacao/cancelar")
+                .param("emailDestinatario", "alanf@gmail.com")
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpect(status().isNotFound());
+        verify(comunicacaoService).alterarStatusComunicacao(email);
+        verifyNoMoreInteractions(comunicacaoService);
+    }
+
+
 
 }
